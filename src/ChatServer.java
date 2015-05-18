@@ -1,5 +1,9 @@
 import java.net.*;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.io.*;
+
+import com.mysql.jdbc.Connection;
 
 public class ChatServer implements Runnable
 {  private ChatServerThread clients[] = new ChatServerThread[50];
@@ -17,7 +21,7 @@ public class ChatServer implements Runnable
       {  System.out.println("Can not bind to port " + port + ": " + ioe.getMessage()); }
    }
    public void run()
-   {  while (thread != null)
+   {  while (true)
       {  try
          {  System.out.println("Waiting for a client ..."); 
             addThread(server.accept()); }
@@ -25,26 +29,29 @@ public class ChatServer implements Runnable
          {  System.out.println("Server accept error: " + ioe); stop(); }
       }
    }
-   public void start()  { /* as before */ } 
-   
-   public void stop()   { /* as before */ }
-   
-   private int findClient(int ID)
+   public void start()  { /* as before */ }
+   public void stop()   {  }
+   private int findClient(String ID)
    {  for (int i = 0; i < clientCount; i++)
          if (clients[i].getID() == ID)
             return i;
       return -1;
    }
-   public synchronized void handle(int ID, String input)
-   {  if (input.equals(".bye"))
-      {  clients[findClient(ID)].send(".bye");
-         remove(ID); }
+   public synchronized void handle(String ID, String input)
+   {   
+	   String Command = input.substring(0,4);
+	   String Content = input.substring(4,input.length());
+	   
+	   if (Command.equals("1011"))
+      {     
+	   jdbcmysql dbcon = new jdbcmysql(); 
+	   dbcon.ReturnUID(Content); 
+      }
       else
          for (int i = 0; i < clientCount; i++)
-            clients[i].send(ID + ": " + input);   
+            clients[i].send(ID + ": " + input.substring(0,4));   
    }
-   @SuppressWarnings("deprecation")
-public synchronized void remove(int ID)
+   public synchronized void remove(String ID)
    {  int pos = findClient(ID);
       if (pos >= 0)
       {  ChatServerThread toTerminate = clients[pos];
@@ -73,8 +80,7 @@ public synchronized void remove(int ID)
          System.out.println("Client refused: maximum " + clients.length + " reached.");
    }
    public static void main(String args[]) { 
-	   
-	   new ChatServer(1519);   
-	   new ChatClient("0.0.0.0",1519);
+	   Thread t  = new Thread(new ChatServer(1519)); // 產生Thread物件
+       t.start(); 
    }
 }

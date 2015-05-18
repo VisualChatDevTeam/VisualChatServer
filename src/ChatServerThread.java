@@ -4,18 +4,18 @@ import java.io.*;
 public class ChatServerThread extends Thread
 {  private ChatServer       server    = null;
    private Socket           socket    = null;
-   private int              ID        = -1;
-   private DataInputStream  streamIn  =  null;
+   private String           ID        = ""  ;
+   private String           UserID    = ""  ; 
+   private DataInputStream  streamIn  = null;
    private DataOutputStream streamOut = null;
 
    public ChatServerThread(ChatServer _server, Socket _socket)
    {  super();
       server = _server;
       socket = _socket;
-      ID     = socket.getPort();
+      ID     = socket.getRemoteSocketAddress().toString();
    }
-   @SuppressWarnings("deprecation")
-public void send(String msg)
+   public void send(String msg)
    {   try
        {  streamOut.writeUTF(msg);
           streamOut.flush();
@@ -26,11 +26,10 @@ public void send(String msg)
           stop();
        }
    }
-   public int getID()
+   public String getID()
    {  return ID;
    }
-   @SuppressWarnings("deprecation")
-public void run()
+   public void run()
    {  System.out.println("Server Thread " + ID + " running.");
       while (true)
       {  try
