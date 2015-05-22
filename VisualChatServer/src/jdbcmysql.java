@@ -81,7 +81,7 @@ public class jdbcmysql {
   } 
   
 
-  public String ReturnUID(String gmail) 
+  public String ReturnUID(String gmail,boolean onlyfind ) 
   { String UID = null;
     try 
     { 	
@@ -95,7 +95,7 @@ public class jdbcmysql {
         UID = rs.getString("USERID") ;
         Found = true;
       } 
-      if (Found==false){
+      if (Found==false && onlyfind!=true){
     	  UID = CreateUID(gmail);//   	   	      	    	  
       }
       System.out.println("User : " + gmail +" ,Verification End !"); 
@@ -110,6 +110,32 @@ public class jdbcmysql {
     } 
     return UID; 
   } 
+  
+  public String ReturnGmail(String UID) 
+  { String Gmail = null;
+    try 
+    { 	
+      stat = con.createStatement(); 
+      rs = stat.executeQuery("select * from userlist where USERID='"+UID+"'"); 
+      System.out.println("User : " + UID +" ,start verification.."); 
+      while(rs.next()) 
+      { 
+        System.out.println( "User : " + rs.getString("USERID") + " ,has return the GMAIL : "+ rs.getString("GMAIL")); 
+        Gmail = rs.getString("GMAIL") ;
+      } 
+     System.out.println("User : " + Gmail +" ,Verification End !"); 
+    } 
+    catch(SQLException e) 
+    { 
+      System.out.println("DropDB Exception :" + e.toString()); 
+    } 
+    finally 
+    { 
+      Close(); 
+    } 
+    return Gmail; 
+  } 
+  
      
 
   public void Close() 

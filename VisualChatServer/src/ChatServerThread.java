@@ -53,4 +53,10 @@ public class ChatServerThread extends Thread
       if (streamIn != null)  streamIn.close();
       if (streamOut != null) streamOut.close();
    }
+public String getUserID() {
+	return UserID;
+}
+public void setUserID(String userID) {
+	UserID = userID;
+}
 }
