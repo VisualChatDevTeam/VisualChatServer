@@ -1,3 +1,4 @@
+package visualchat.server.main;
 import java.util.ArrayList;
 
 

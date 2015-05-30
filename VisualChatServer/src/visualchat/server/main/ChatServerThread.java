@@ -1,5 +1,16 @@
-import java.net.*;
-import java.io.*;
+package visualchat.server.main;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.Arrays;
+
+import visualchat.server.admingui.*;
+import visualchat.server.admingui.ServerFrame.UserTableModel;
+import visualchat.server.config.Prefex;
+
 
 public class ChatServerThread extends Thread
 {  private ChatServer       server    = null;
@@ -14,6 +25,7 @@ public class ChatServerThread extends Thread
       server = _server;
       socket = _socket;
       ID     = socket.getRemoteSocketAddress().toString();
+      ServerFrame.UserTableModel.addRow(Arrays.asList(UserID,socket.getInetAddress().toString(),String.valueOf(socket.getPort())));
    }
    public void send(String msg)
    {   try
@@ -21,24 +33,24 @@ public class ChatServerThread extends Thread
           streamOut.flush();
        }
        catch(IOException ioe)
-       {  System.out.println(ID + " ERROR sending: " + ioe.getMessage());
+       {  ServerFrame.displayMessage(Prefex.getlogPrefex(1)+ID + " ERROR sending: " + ioe.getMessage());
           server.remove(ID);
-          stop();
+          interrupt();
        }
    }
    public String getID()
    {  return ID;
    }
    public void run()
-   {  System.out.println("Server Thread " + ID + " running.");
+   {  ServerFrame.displayMessage(Prefex.getlogPrefex(1)+"Server Thread " + ID + " running.");
       while (true)
       {  try
          {  server.handle(ID, streamIn.readUTF());
          }
          catch(IOException ioe)
-         {  System.out.println(ID + " ERROR reading: " + ioe.getMessage());
+         {  ServerFrame.displayMessage(Prefex.getlogPrefex(1)+ID + " ERROR reading: " + ioe.getMessage());
             server.remove(ID);
-            stop();
+            interrupt();
          }
       }
    }
@@ -49,7 +61,8 @@ public class ChatServerThread extends Thread
                         BufferedOutputStream(socket.getOutputStream()));
    }
    public void close() throws IOException
-   {  if (socket != null)    socket.close();
+   {  
+	   if (socket != null)    socket.close();
       if (streamIn != null)  streamIn.close();
       if (streamOut != null) streamOut.close();
    }
